@@ -15,7 +15,7 @@ import 'package:uuid/uuid.dart';
 
 class ChatProvider extends ChangeNotifier {
   //list of messages
-  List<Message> _inChatMessages = [];
+  final List<Message> _inChatMessages = [];
 
   //page controller
   final PageController _pageController = PageController();
@@ -155,7 +155,7 @@ class ChatProvider extends ChangeNotifier {
 
     // user message
     final userMessage = Message(
-      messageId: '',
+      messageId: const Uuid().v4(),
       chatId: chatId,
       role: Role.user,
       message: StringBuffer(message),
@@ -199,7 +199,7 @@ class ChatProvider extends ChangeNotifier {
 
     // assistant message
     final assistantMessage = userMessage.copyWith(
-      messageId: ' ',
+      messageId: const Uuid().v4(),
       message: StringBuffer(),
       timeSent: DateTime.now(),
       role: Role.assistant,

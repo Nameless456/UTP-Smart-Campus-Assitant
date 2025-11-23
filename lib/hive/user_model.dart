@@ -4,7 +4,6 @@ part 'user_model.g.dart';
 
 @HiveType(typeId: 1)
 class UserModel extends HiveObject {
-
   @HiveField(0)
   final String uid;
 
@@ -14,13 +13,14 @@ class UserModel extends HiveObject {
   @HiveField(2)
   final String image;
 
+  @HiveField(3)
+  final String email;
 
   //constructor
   UserModel({
     required this.uid,
     required this.name,
     required this.image,
-
+    required this.email,
   });
-
 }
