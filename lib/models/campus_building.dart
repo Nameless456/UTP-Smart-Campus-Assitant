@@ -1,6 +1,6 @@
 import 'package:latlong2/latlong.dart';
 
-/// Model class representing a campus building with its location and information
+//model class representing a campus building with its location and information
 class CampusBuilding {
   final String id;
   final String name;
@@ -18,7 +18,7 @@ class CampusBuilding {
     required this.icon,
   });
 
-  /// Create a CampusBuilding from JSON
+  //create a campus building from json
   factory CampusBuilding.fromJson(String id, Map<String, dynamic> json) {
     return CampusBuilding(
       id: id,
@@ -30,12 +30,12 @@ class CampusBuilding {
     );
   }
 
-  /// Convert to LatLng for flutter_map
+  //convert to latlng for flutter_map
   LatLng toLatLng() {
     return LatLng(lat, lng);
   }
 
-  /// Convert to JSON
+  //convert to json
   Map<String, dynamic> toJson() {
     return {
       'id': id,

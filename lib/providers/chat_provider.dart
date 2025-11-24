@@ -36,23 +36,23 @@ class ChatProvider extends ChangeNotifier {
   //initialize text model
   GenerativeModel? _textModel;
 
-  // initialize vision model
+  //initialize vision model
   GenerativeModel? _visionModel;
 
-  // current model
+  //current model
   String _modelType = 'gemini-pro';
 
-  // loading bool
+  //loading bool
   bool _isLoading = false;
 
-  // navigation service
+  //navigation service
   final MapNavigationService _navigationService = MapNavigationService();
 
-  // setters
+  //setters
 
-  // set inChatMessages
+  //set inChatMessages
   Future<void> setInChatMessages({required String chatId}) async {
-    // get messages from hive database
+    //get messages from hive database
     final messageFromDB = await loadMessagesFromDB(chatId: chatId);
 
     for (var message in messageFromDB) {
@@ -66,9 +66,9 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // load the messages from db
+  //load the messages from db
   Future<List<Message>> loadMessagesFromDB({required String chatId}) async {
-    // open the box of this chatID
+    //open the box of this chatID
     await Hive.openBox('${Constant.chatMessagesBox}$chatId');
 
     final messageBox = Hive.box('${Constant.chatMessagesBox}$chatId');
@@ -83,20 +83,20 @@ class ChatProvider extends ChangeNotifier {
     return newData;
   }
 
-  // set file list
+  //set file list
   void setImagesFileList({required List<XFile>? listValue}) {
     _imagesFileList = listValue;
     notifyListeners();
   }
 
-  // set current model
+  //set current model
   String setCurrentModel({required String newModel}) {
     _modelType = newModel;
     notifyListeners();
     return newModel;
   }
 
-  // function to set the model base on bool - isTextOnly
+  //function to set the model base on bool - isTextOnly
   Future<void> setModel({required bool isTextOnly}) async {
     if (isTextOnly) {
       _model =
@@ -116,51 +116,51 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // set current page index
+  //set current page index
   void setCurrentIndex({required int newIndex}) {
     _currentIndex = newIndex;
     notifyListeners();
   }
 
-  // set current chatId
+  //set current chatId
   void setCurrentChatId({required String newChatId}) {
     _currentChatId = newChatId;
     notifyListeners();
   }
 
-  // set loading
+  //set loading
   void setLoading({required bool value}) {
     _isLoading = value;
     notifyListeners();
   }
 
-  // send message to gemini and get the streamed response
+  //send message to gemini and get the streamed response
   Future<void> sentMessage({
     required String message,
     required bool isTextOnly,
     required BuildContext context,
   }) async {
-    // Check if this is a navigation request
+    //check if this is a navigation request
     if (_navigationService.isNavigationRequest(message)) {
-      // Get navigation response with distance info
+      //get navigation response with distance info
       final navResponse = await _navigationService.getNavigationResponse(
         message,
       );
 
       if (navResponse != null) {
-        // set the model
+        //set the model
         await setModel(isTextOnly: isTextOnly);
 
-        // set loading to true
+        //set loading to true
         setLoading(value: true);
 
-        // get the chatid
+        //get the chatid
         String chatId = getChatID();
 
-        // get the imagesUrls
+        //get the imagesUrls
         List<String> imagesUrls = getImagesUrls(isTextOnly: isTextOnly);
 
-        // user message
+        //user message
         final userMessage = Message(
           messageId: const Uuid().v4(),
           chatId: chatId,
@@ -170,7 +170,7 @@ class ChatProvider extends ChangeNotifier {
           timeSent: DateTime.now(),
         );
 
-        // add user message to chat
+        //add user message to chat
         _inChatMessages.add(userMessage);
         notifyListeners();
 
@@ -178,7 +178,7 @@ class ChatProvider extends ChangeNotifier {
           setCurrentChatId(newChatId: chatId);
         }
 
-        // Create assistant response with navigation info
+        //create assistant response with navigation info
         final assistantMessage = userMessage.copyWith(
           messageId: const Uuid().v4(),
           message: StringBuffer(navResponse),
@@ -186,14 +186,14 @@ class ChatProvider extends ChangeNotifier {
           role: Role.assistant,
         );
 
-        // add assistant message to chat
+        //add assistant message to chat
         _inChatMessages.add(assistantMessage);
         notifyListeners();
 
-        // set loading to false
+        //set loading to false
         setLoading(value: false);
 
-        // Open the map
+        //open the map
         await _navigationService.handleNavigationCommand(context, message);
 
         return;

@@ -4,16 +4,15 @@ import 'package:latlong2/latlong.dart';
 import '../models/campus_building.dart';
 import '../models/map_config.dart';
 
-/// Service for managing routes and navigation between buildings
+//service for managing routes and navigation between buildings
 class MapRouteService {
-  /// Generate a simple straight-line route between two buildings
-  /// This is used as a fallback or for quick preview
+  //generate a simple straight-line route between two buildings
+  //this is used as a fallback or for quick preview
   List<LatLng> generateRoute(CampusBuilding from, CampusBuilding to) {
     return [from.toLatLng(), to.toLatLng()];
   }
 
-  /// Fetch a realistic walking route using OSRM API
-  /// Returns a list of points representing the path
+  //fetch a realistic walking route using OSRM API
   Future<List<LatLng>> fetchRoute(
     CampusBuilding from,
     CampusBuilding to,
@@ -22,7 +21,7 @@ class MapRouteService {
       final start = from.toLatLng();
       final end = to.toLatLng();
 
-      // OSRM Public API (Walking profile)
+      //OSRM Public API (Walking profile)
       final url = Uri.parse(
         'http://router.project-osrm.org/route/v1/foot/'
         '${start.longitude},${start.latitude};'
@@ -40,7 +39,7 @@ class MapRouteService {
           final coordinates = geometry['coordinates'] as List;
 
           return coordinates.map((coord) {
-            // GeoJSON is [lng, lat]
+            //GeoJSON is [lng, lat]
             return LatLng(
               (coord[1] as num).toDouble(),
               (coord[0] as num).toDouble(),
@@ -49,15 +48,15 @@ class MapRouteService {
         }
       }
 
-      // Fallback to straight line if API fails or no route found
+      //fallback to straight line if API fails or no route found
       return generateRoute(from, to);
     } catch (e) {
-      // Fallback on error
+      //fallback on error
       return generateRoute(from, to);
     }
   }
 
-  /// Calculate estimated walking time in minutes
+  //calculate estimated walking time in minutes
   int calculateWalkingTime(CampusBuilding from, CampusBuilding to) {
     const Distance distance = Distance();
     final meters = distance.as(
@@ -72,7 +71,7 @@ class MapRouteService {
     return minutes < 1 ? 1 : minutes;
   }
 
-  /// Format distance for display
+  //format distance for display
   String formatDistance(double meters) {
     if (meters < 1000) {
       return '${meters.round()} m';
@@ -91,7 +90,7 @@ class MapRouteService {
     return MapConfig.routeStrokeWidth;
   }
 
-  //Generate route directions text
+  //generate route directions text
   String generateDirections(CampusBuilding from, CampusBuilding to) {
     const Distance distance = Distance();
     final meters = distance.as(

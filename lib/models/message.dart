@@ -6,7 +6,7 @@ class Message {
   List<String> imageUrls;
   DateTime timeSent;
 
-  // Constructor
+  //constructor
   Message({
     required this.messageId,
     required this.chatId,
@@ -40,7 +40,7 @@ class Message {
     );
   }
 
-  // copyWith
+  //copyWith
   Message copyWith({
     String? messageId,
     String? chatId,
@@ -63,8 +63,7 @@ class Message {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Message &&
-        other.messageId == messageId;
+    return other is Message && other.messageId == messageId;
   }
 
   @override
@@ -73,7 +72,4 @@ class Message {
   }
 }
 
-enum Role {
-  user,
-  assistant,
-}
+enum Role { user, assistant }

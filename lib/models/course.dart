@@ -11,7 +11,7 @@ class Course {
     required this.grade,
   });
 
-  //Get grade point based on grade
+  //get grade point based on grade
   double get gradePoint {
     switch (grade.toUpperCase()) {
       case 'A':
@@ -41,12 +41,12 @@ class Course {
     }
   }
 
-  //Convert to map for storage
+  //convert to map for storage
   Map<String, dynamic> toMap() {
     return {'id': id, 'name': name, 'creditHours': creditHours, 'grade': grade};
   }
 
-  //Create from map
+  //create from map
   factory Course.fromMap(Map<String, dynamic> map) {
     return Course(
       id: map['id'],
