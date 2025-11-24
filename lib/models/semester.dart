@@ -7,7 +7,7 @@ class Semester {
 
   Semester({required this.id, required this.name, required this.courses});
 
-  // Calculate GPA for this semester
+  //calculate GPA for this semester
   double get gpa {
     if (courses.isEmpty) return 0.0;
 
@@ -22,12 +22,12 @@ class Semester {
     return totalCredits > 0 ? totalPoints / totalCredits : 0.0;
   }
 
-  // Get total credit hours
+  //get total credit hours
   int get totalCreditHours {
     return courses.fold(0, (sum, course) => sum + course.creditHours);
   }
 
-  // Convert to map for storage
+  //convert to map for storage
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -36,7 +36,7 @@ class Semester {
     };
   }
 
-  // Create from map
+  //create from map
   factory Semester.fromMap(Map<String, dynamic> map) {
     return Semester(
       id: map['id'],
@@ -47,7 +47,7 @@ class Semester {
     );
   }
 
-  // Copy with method for immutability
+  //copy with method for immutability
   Semester copyWith({String? id, String? name, List<Course>? courses}) {
     return Semester(
       id: id ?? this.id,

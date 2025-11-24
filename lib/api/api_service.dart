@@ -1,3 +1,3 @@
 class ApiService {
-  static const apikey = 'AIzaSyDB6kmD-zUvyzddfCbN21uwHieVNQRYmAc';
+  static const apikey = 'AIzaSyDWKbGV-wYxxcSEnW8p-VAm-IT2MgIan50';
 }

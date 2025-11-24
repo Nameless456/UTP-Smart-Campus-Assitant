@@ -7,6 +7,7 @@ import 'package:flutter_gemini/hive/chat_history.dart';
 import 'package:flutter_gemini/hive/settings.dart';
 import 'package:flutter_gemini/hive/user_model.dart';
 import 'package:flutter_gemini/models/message.dart';
+import 'package:flutter_gemini/services/map_navigation_service.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path;
@@ -36,13 +37,16 @@ class ChatProvider extends ChangeNotifier {
   GenerativeModel? _textModel;
 
   // initialize vision model
-  GenerativeModel? _VisionModel;
+  GenerativeModel? _visionModel;
 
   // current model
   String _modelType = 'gemini-pro';
 
   // loading bool
   bool _isLoading = false;
+
+  // navigation service
+  final MapNavigationService _navigationService = MapNavigationService();
 
   // setters
 
@@ -103,7 +107,7 @@ class ChatProvider extends ChangeNotifier {
           );
     } else {
       _model =
-          _VisionModel ??
+          _visionModel ??
           GenerativeModel(
             model: setCurrentModel(newModel: 'gemini-2.5-flash'),
             apiKey: ApiService.apikey,
@@ -134,7 +138,69 @@ class ChatProvider extends ChangeNotifier {
   Future<void> sentMessage({
     required String message,
     required bool isTextOnly,
+    required BuildContext context,
   }) async {
+    // Check if this is a navigation request
+    if (_navigationService.isNavigationRequest(message)) {
+      // Get navigation response with distance info
+      final navResponse = await _navigationService.getNavigationResponse(
+        message,
+      );
+
+      if (navResponse != null) {
+        // set the model
+        await setModel(isTextOnly: isTextOnly);
+
+        // set loading to true
+        setLoading(value: true);
+
+        // get the chatid
+        String chatId = getChatID();
+
+        // get the imagesUrls
+        List<String> imagesUrls = getImagesUrls(isTextOnly: isTextOnly);
+
+        // user message
+        final userMessage = Message(
+          messageId: const Uuid().v4(),
+          chatId: chatId,
+          role: Role.user,
+          message: StringBuffer(message),
+          imageUrls: imagesUrls,
+          timeSent: DateTime.now(),
+        );
+
+        // add user message to chat
+        _inChatMessages.add(userMessage);
+        notifyListeners();
+
+        if (currentChatId.isEmpty) {
+          setCurrentChatId(newChatId: chatId);
+        }
+
+        // Create assistant response with navigation info
+        final assistantMessage = userMessage.copyWith(
+          messageId: const Uuid().v4(),
+          message: StringBuffer(navResponse),
+          timeSent: DateTime.now(),
+          role: Role.assistant,
+        );
+
+        // add assistant message to chat
+        _inChatMessages.add(assistantMessage);
+        notifyListeners();
+
+        // set loading to false
+        setLoading(value: false);
+
+        // Open the map
+        await _navigationService.handleNavigationCommand(context, message);
+
+        return;
+      }
+    }
+
+    // Regular message flow (non-navigation)
     // set the model
     await setModel(isTextOnly: isTextOnly);
 
@@ -309,7 +375,7 @@ class ChatProvider extends ChangeNotifier {
   String get currentChatId => _currentChatId;
   GenerativeModel? get model => _model;
   GenerativeModel? get textModel => _textModel;
-  GenerativeModel? get visionModel => _VisionModel;
+  GenerativeModel? get visionModel => _visionModel;
   String get modelType => _modelType;
   bool get isLoading => _isLoading;
 

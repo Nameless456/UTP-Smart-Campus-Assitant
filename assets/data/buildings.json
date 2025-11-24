@@ -1,0 +1,226 @@
+{
+  "library": {
+    "id": "library",
+    "name": "UTP Library",
+    "lat": 4.382425,
+    "lng": 100.969610,
+    "description": "IRC - Main campus library with extensive collection of books and digital resources",
+    "icon": "local_library"
+  },
+  "block_1": {
+    "id": "block_1",
+    "name": "Academic Block 1",
+    "lat": 4.3813888,
+    "lng": 100.9684626,
+    "description": "Academic Block 1 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_2": {
+    "id": "block_2",
+    "name": "Academic Block 2",
+    "lat": 4.3809138,
+    "lng": 100.9683865,
+    "description": "Academic Block 2 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_3": {
+    "id": "block_3",
+    "name": "Academic Block 3",
+    "lat": 4.3806139,
+    "lng": 100.9681981,
+    "description": "Academic Block 3 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_4": {
+    "id": "block_4",
+    "name": "Academic Block 4",
+    "lat": 4.3804451,
+    "lng": 100.9676868,
+    "description": "Academic Block 4 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_5": {
+    "id": "block_5",
+    "name": "Academic Block 5",
+    "lat": 4.3800125,
+    "lng": 100.9679748,
+    "description": "Academic Block 5 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_11": {
+    "id": "block_11",
+    "name": "Academic Block 11",
+    "lat": 4.3805715,
+    "lng": 100.9646834,
+    "description": "Academic Block 11 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_12": {
+    "id": "block_12",
+    "name": "Academic Block 12",
+    "lat": 4.381044521503097,
+    "lng": 100.9647236019245,
+    "description": "Academic Block 12 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_13": {
+    "id": "block_13",
+    "name": "Academic Block 13",
+    "lat": 4.381464397751576,
+    "lng": 100.96435613929815,
+    "description": "Academic Block 13 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_14": {
+    "id": "block_14",
+    "name": "Academic Block 14",
+    "lat": 4.381793345234769,
+    "lng": 100.96412815154629,
+    "description": "Academic Block 14 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_15": {
+    "id": "block_15",
+    "name": "Academic Block 15",
+    "lat": 4.382777937019508,
+    "lng": 100.96472253804687,
+    "description": "Academic Block 15 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_16": {
+    "id": "block_16",
+    "name": "Academic Block 16",
+    "lat": 4.382706694034112,
+    "lng": 100.96523788552632,
+    "description": "Academic Block 16 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_17": {
+    "id": "block_17",
+    "name": "Academic Block 17",
+    "lat": 4.383030292227689,
+    "lng": 100.96602645495804,
+    "description": "Academic Block 17 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_18": {
+    "id": "block_18",
+    "name": "Academic Block 18",
+    "lat": 4.383016658115985,
+    "lng": 100.96603926466724,
+    "description": "Academic Block 18 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_19": {
+    "id": "block_19",
+    "name": "Academic Block 19",
+    "lat": 4.3833901646372935,
+    "lng": 100.96626919649,
+    "description": "Academic Block 19 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_20": {
+    "id": "block_20",
+    "name": "Academic Block 20",
+    "lat": 4.383341487329766,
+    "lng": 100.96743989146698,
+    "description": "Academic Block 20 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_21": {
+    "id": "block_21",
+    "name": "Academic Block 21",
+    "lat": 4.382864144080154,
+    "lng": 100.96752353321858,
+    "description": "Academic Block 21 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_22": {
+    "id": "block_22",
+    "name": "Academic Block 22",
+    "lat": 4.382618102430594,
+    "lng": 100.96788965474808,
+    "description": "Academic Block 22 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "block_23": {
+    "id": "block_23",
+    "name": "Academic Block 23",
+    "lat": 4.38242955958985,
+    "lng": 100.96829869162438,
+    "description": "Academic Block 23 - Lecture halls and classrooms",
+    "icon": "school"
+  },
+  "sports_complex": {
+    "id": "sports_complex",
+    "name": "Sports Complex",
+    "lat": 4.386958,
+    "lng": 100.974427,
+    "description": "Campus sports facilities including gymnasium and fields",
+    "icon": "sports_soccer"
+  },
+  "mosque": {
+    "id": "mosque",
+    "name": "UTP Mosque",
+    "lat": 4.385650,
+    "lng": 100.973781,
+    "description": "Campus mosque for prayer and worship",
+    "icon": "mosque"
+  },
+  "chancellor_complex": {
+    "id": "chancellor_complex",
+    "name": "Chancellor Complex",
+    "lat": 4.381992,
+    "lng": 100.970117,
+    "description": "Campus main attraction with Chancellor Hall and Library located",
+    "icon": "chancellor"
+  },
+  "rnd": {
+    "id": "rnd",
+    "name": "RnD Building",
+    "lat": 4.3791120,
+    "lng": 100.9611036,
+    "description": "Research and Development building for academic research",
+    "icon": "biotech"
+  },
+  "main_hall": {
+    "id": "main_hall",
+    "name": "Main Hall",
+    "lat": 4.3864150,
+    "lng": 100.9720242,
+    "description": "Main hall for large events and ceremonies",
+    "icon": "event"
+  },
+  "utp_field": {
+    "id": "utp_field",
+    "name": "UTP Field",
+    "lat": 4.3865413,
+    "lng": 100.9775278,
+    "description": "Outdoor sports field for athletics and recreation",
+    "icon": "sports_soccer"
+  },
+  "oval_park": {
+    "id": "oval_park",
+    "name": "Oval Park",
+    "lat": 4.3842785,
+    "lng": 100.9767493,
+    "description": "Campus park and recreational area",
+    "icon": "park"
+  },
+  "cetal": {
+    "id": "cetal",
+    "name": "CETAL",
+    "lat": 4.3839425,
+    "lng": 100.9714204,
+    "description": "Centre for Technology Enhanced Learning - Teaching innovation center",
+    "icon": "computer"
+  },
+  "village_1": {
+    "id": "village_1",
+    "name": "Village 1",
+    "lat": 4.3871806860480635,
+    "lng": 100.97054166937923,
+    "description": "Student accommodation Village 1",
+    "icon": "home"
+  }
+}

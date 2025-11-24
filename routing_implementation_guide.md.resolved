@@ -1,0 +1,78 @@
+# 🛣️ Obstacle-Aware Routing Implementation
+
+## The Problem
+The previous navigation system used **straight-line distance** (Euclidean distance). It ignored:
+- Buildings 🏢
+- Lakes/Ponds 🌊
+- Grass areas 🌱
+- Fences 🚧
+
+## The Solution: Pathfinding
+To "go around" obstacles, we need a **Pathfinding Algorithm**. Instead of calculating a direct line, we need to follow a network of valid paths (roads, walkways).
+
+We implemented this using **OSRM (Open Source Routing Machine)**, a powerful routing engine that uses OpenStreetMap data.
+
+## How It Works
+
+### 1. Fetching the Route
+When you request navigation (e.g., "Library to Cafeteria"), the app now sends a request to the OSRM API:
+
+```dart
+// MapRouteService.dart
+
+final url = Uri.parse(
+  'http://router.project-osrm.org/route/v1/foot/'
+  '${start.lng},${start.lat};' // Start Point
+  '${end.lng},${end.lat}'       // End Point
+  '?overview=full&geometries=geojson'
+);
+```
+
+### 2. Parsing the Path
+The API returns a **GeoJSON** object containing a list of coordinates that follow actual walkways.
+
+```json
+{
+  "routes": [
+    {
+      "geometry": {
+        "coordinates": [
+          [100.9745, 4.3852], // Point A
+          [100.9746, 4.3853], // Turn right at corner
+          [100.9750, 4.3855]  // Point B
+        ]
+      }
+    }
+  ]
+}
+```
+
+### 3. Visualizing the Path
+The app draws a `Polyline` connecting these specific points. This creates a line that:
+- ✅ Turns corners
+- ✅ Follows sidewalks
+- ✅ Goes around buildings
+- ✅ Avoids lakes
+
+### 4. Fallback Mechanism
+If the device is offline or the API fails, the system automatically falls back to the straight-line method so the user isn't left without guidance.
+
+```dart
+try {
+  // Try to get realistic path
+  return await fetchRoute(from, to);
+} catch (e) {
+  // If offline, draw straight line
+  return generateRoute(from, to);
+}
+```
+
+## Why This is Better
+- **Realistic:** Shows actual walking distance (e.g., 400m walk vs 200m straight line).
+- **Safe:** Guides users to crosswalks and paths rather than through restricted areas.
+- **Accurate:** "5 minute walk" is now based on the actual path length.
+
+## Next Steps (Optional)
+To further improve this:
+1.  **Indoor Navigation:** OSRM only covers outdoor paths. For inside buildings, we would need a custom internal graph.
+2.  **Custom Paths:** We can map specific "shortcuts" on campus into OpenStreetMap to make them available in the routing.

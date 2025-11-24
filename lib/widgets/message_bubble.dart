@@ -10,6 +10,7 @@ class MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUser = message.role == Role.user;
     final theme = Theme.of(context);
+    final isLoading = !isUser && message.message.toString().trim().isEmpty;
 
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 300),
@@ -57,7 +58,9 @@ class MessageBubble extends StatelessWidget {
                               ],
                             )
                           : null,
-                      color: isUser ? null : theme.colorScheme.surfaceVariant,
+                      color: isUser
+                          ? null
+                          : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(20),
                         topRight: const Radius.circular(20),
@@ -72,27 +75,31 @@ class MessageBubble extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Text(
-                      message.message.toString(),
-                      style: TextStyle(
-                        color: isUser
-                            ? Colors.white
-                            : theme.colorScheme.onSurfaceVariant,
-                        fontSize: 15,
-                        height: 1.4,
+                    child: isLoading
+                        ? _buildTypingIndicator(theme)
+                        : Text(
+                            message.message.toString(),
+                            style: TextStyle(
+                              color: isUser
+                                  ? Colors.white
+                                  : theme.colorScheme.onSurfaceVariant,
+                              fontSize: 15,
+                              height: 1.4,
+                            ),
+                          ),
+                  ),
+                  if (!isLoading) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatTime(message.timeSent),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.6,
+                        ),
+                        fontSize: 11,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatTime(message.timeSent),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.6,
-                      ),
-                      fontSize: 11,
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -131,6 +138,30 @@ class MessageBubble extends StatelessWidget {
         isUser ? Icons.person : Icons.smart_toy_outlined,
         color: Colors.white,
         size: 20,
+      ),
+    );
+  }
+
+  Widget _buildTypingIndicator(ThemeData theme) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildDot(theme),
+        const SizedBox(width: 4),
+        _buildDot(theme),
+        const SizedBox(width: 4),
+        _buildDot(theme),
+      ],
+    );
+  }
+
+  Widget _buildDot(ThemeData theme) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+        shape: BoxShape.circle,
       ),
     );
   }

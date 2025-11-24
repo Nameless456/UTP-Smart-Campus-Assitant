@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/providers/chat_provider.dart';
+import 'package:flutter_gemini/screens/campus_map_screen.dart';
 import 'package:flutter_gemini/widgets/bottom_chat_field.dart';
 import 'package:flutter_gemini/widgets/custom_drawer.dart';
 import 'package:flutter_gemini/widgets/message_bubble.dart';
-import 'package:flutter_gemini/widgets/typing_indicator.dart';
 import 'package:provider/provider.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -36,7 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
-        // Auto-scroll when new messages arrive
+        //auto-scroll when new messages arrive
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (chatProvider.inChatMessages.isNotEmpty) {
             _scrollToBottom();
@@ -55,6 +55,20 @@ class _ChatScreenState extends State<ChatScreen> {
                 tooltip: 'Menu',
               ),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.map_outlined),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CampusMapScreen(),
+                    ),
+                  );
+                },
+                tooltip: 'Campus Map',
+              ),
+            ],
           ),
           drawer: const CustomDrawer(),
           body: Container(
@@ -77,20 +91,15 @@ class _ChatScreenState extends State<ChatScreen> {
                         : ListView.builder(
                             controller: _scrollController,
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            itemCount:
-                                chatProvider.inChatMessages.length +
-                                (chatProvider.isLoading ? 1 : 0),
+                            itemCount: chatProvider.inChatMessages.length,
                             itemBuilder: (context, index) {
-                              if (index == chatProvider.inChatMessages.length) {
-                                return const TypingIndicator();
-                              }
                               final message =
                                   chatProvider.inChatMessages[index];
                               return MessageBubble(message: message);
                             },
                           ),
                   ),
-                  // Input field
+                  //input field
                   Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
@@ -155,32 +164,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 32),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            alignment: WrapAlignment.center,
-            children: [
-              _buildSuggestionChip(context, '📚 Library hours'),
-              _buildSuggestionChip(context, '🍽️ Cafeteria menu'),
-              _buildSuggestionChip(context, '🏫 Campus map'),
-              _buildSuggestionChip(context, '📅 Academic calendar'),
-            ],
-          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSuggestionChip(BuildContext context, String label) {
-    return ActionChip(
-      label: Text(label),
-      onPressed: () {
-        // Could auto-fill the message field with this suggestion
-      },
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-      labelStyle: TextStyle(
-        color: Theme.of(context).colorScheme.onPrimaryContainer,
       ),
     );
   }
