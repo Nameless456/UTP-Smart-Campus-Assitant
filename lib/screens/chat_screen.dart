@@ -4,6 +4,7 @@ import 'package:flutter_gemini/screens/campus_map_screen.dart';
 import 'package:flutter_gemini/widgets/bottom_chat_field.dart';
 import 'package:flutter_gemini/widgets/custom_drawer.dart';
 import 'package:flutter_gemini/widgets/message_bubble.dart';
+import 'package:flutter_gemini/widgets/quick_reply_chips.dart';
 import 'package:provider/provider.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -57,6 +58,13 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             actions: [
               IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  chatProvider.startNewChat();
+                },
+                tooltip: 'New Chat',
+              ),
+              IconButton(
                 icon: const Icon(Icons.map_outlined),
                 onPressed: () {
                   Navigator.push(
@@ -78,7 +86,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 end: Alignment.bottomCenter,
                 colors: [
                   Theme.of(context).colorScheme.surface,
-                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+                  Theme.of(
+                    context,
+                  ).colorScheme.secondary.withValues(alpha: 0.05),
                 ],
               ),
             ),
@@ -99,6 +110,12 @@ class _ChatScreenState extends State<ChatScreen> {
                             },
                           ),
                   ),
+                  // Quick Reply Chips (Bottom - only if chat is not empty)
+                  if (chatProvider.inChatMessages.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: QuickReplyChips(chatProvider: chatProvider),
+                    ),
                   //input field
                   Container(
                     decoration: BoxDecoration(
@@ -124,47 +141,57 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.colorScheme.primary.withValues(alpha: 0.2),
-                  theme.colorScheme.secondary.withValues(alpha: 0.2),
-                ],
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    theme.colorScheme.primary.withValues(alpha: 0.2),
+                    theme.colorScheme.secondary.withValues(alpha: 0.2),
+                  ],
+                ),
+                shape: BoxShape.circle,
               ),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.chat_bubble_outline,
-              size: 64,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Welcome to UTP Smart Campus!',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48),
-            child: Text(
-              'Ask me anything about campus life, courses, or facilities.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              child: Icon(
+                Icons.chat_bubble_outline,
+                size: 64,
+                color: theme.colorScheme.primary,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            Text(
+              'Welcome to UTP Smart Campus!',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 48),
+              child: Text(
+                'Ask me anything about campus life, courses, or facilities.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            // Centered Quick Reply Chips
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: QuickReplyChips(chatProvider: chatProvider, useWrap: true),
+            ),
+          ],
+        ),
       ),
     );
   }

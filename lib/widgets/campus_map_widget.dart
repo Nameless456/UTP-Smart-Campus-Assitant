@@ -5,7 +5,7 @@ import '../models/campus_building.dart';
 import '../models/map_config.dart';
 import 'building_marker.dart';
 
-/// Reusable campus map widget
+/// Reusable campus map widget (light mode only)
 class CampusMapWidget extends StatefulWidget {
   final CampusBuilding? highlightedBuilding;
   final List<CampusBuilding> buildings;
@@ -46,6 +46,8 @@ class _CampusMapWidgetState extends State<CampusMapWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Define UTP campus boundaries
+
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
@@ -54,14 +56,16 @@ class _CampusMapWidgetState extends State<CampusMapWidget> {
         initialZoom: MapConfig.defaultZoom,
         minZoom: MapConfig.minZoom,
         maxZoom: MapConfig.maxZoom,
+        // Restrict panning to campus boundaries
+        // cameraConstraint: CameraConstraint.contain(bounds: campusBounds),
         interactionOptions: const InteractionOptions(
           flags: InteractiveFlag.all,
         ),
       ),
       children: [
-        // OpenStreetMap tile layer
+        // Map tile layer - always use light mode
         TileLayer(
-          urlTemplate: MapConfig.tileUrl,
+          urlTemplate: MapConfig.lightTileUrl,
           userAgentPackageName: MapConfig.userAgent,
           tileProvider: NetworkTileProvider(),
         ),

@@ -8,6 +8,7 @@ class CampusBuilding {
   final double lng;
   final String description;
   final String icon;
+  final double height; // Building height in meters for 3D effects
 
   CampusBuilding({
     required this.id,
@@ -16,6 +17,7 @@ class CampusBuilding {
     required this.lng,
     required this.description,
     required this.icon,
+    this.height = 15.0, // Default height ~4 floors
   });
 
   //create a campus building from json
@@ -27,6 +29,9 @@ class CampusBuilding {
       lng: (json['lng'] as num).toDouble(),
       description: json['description'] as String,
       icon: json['icon'] as String,
+      height: json['height'] != null
+          ? (json['height'] as num).toDouble()
+          : 15.0,
     );
   }
 
@@ -44,11 +49,12 @@ class CampusBuilding {
       'lng': lng,
       'description': description,
       'icon': icon,
+      'height': height,
     };
   }
 
   @override
   String toString() {
-    return 'CampusBuilding(id: $id, name: $name, location: ($lat, $lng))';
+    return 'CampusBuilding(id: $id, name: $name, location: ($lat, $lng), height: ${height}m)';
   }
 }

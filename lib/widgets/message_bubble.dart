@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/models/message.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class MessageBubble extends StatelessWidget {
   final Message message;
@@ -77,14 +78,22 @@ class MessageBubble extends StatelessWidget {
                     ),
                     child: isLoading
                         ? _buildTypingIndicator(theme)
-                        : Text(
-                            message.message.toString(),
-                            style: TextStyle(
-                              color: isUser
-                                  ? Colors.white
-                                  : theme.colorScheme.onSurfaceVariant,
-                              fontSize: 15,
-                              height: 1.4,
+                        : MarkdownBody(
+                            data: message.message.toString(),
+                            styleSheet: MarkdownStyleSheet(
+                              p: TextStyle(
+                                color: isUser
+                                    ? Colors.white
+                                    : theme.colorScheme.onSurfaceVariant,
+                                fontSize: 15,
+                                height: 1.4,
+                              ),
+                              strong: TextStyle(
+                                color: isUser
+                                    ? Colors.white
+                                    : theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                   ),

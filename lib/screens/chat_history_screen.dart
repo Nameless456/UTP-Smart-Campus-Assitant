@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/constant.dart';
 import 'package:flutter_gemini/hive/chat_history.dart';
+import 'package:flutter_gemini/providers/chat_provider.dart';
+import 'package:flutter_gemini/screens/chat_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 
 class ChatHistoryScreen extends StatefulWidget {
   const ChatHistoryScreen({super.key});
@@ -109,13 +112,19 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Chat history feature coming soon!'),
-              duration: Duration(seconds: 1),
-            ),
+        onTap: () async {
+          final chatProvider = Provider.of<ChatProvider>(
+            context,
+            listen: false,
           );
+          await chatProvider.loadChat(chat.chatid);
+
+          if (context.mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ChatScreen()),
+            );
+          }
         },
         child: Padding(
           padding: const EdgeInsets.all(16),

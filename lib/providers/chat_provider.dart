@@ -1,22 +1,31 @@
 import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_gemini/api/api_service.dart';
 import 'package:flutter_gemini/constant.dart';
 import 'package:flutter_gemini/hive/chat_history.dart';
 import 'package:flutter_gemini/hive/settings.dart';
 import 'package:flutter_gemini/hive/user_model.dart';
 import 'package:flutter_gemini/models/message.dart';
+import 'package:flutter_gemini/models/academic_record.dart';
+import 'package:flutter_gemini/models/deadline_item.dart';
+import 'package:flutter_gemini/services/knowledge_base_service.dart';
 import 'package:flutter_gemini/services/map_navigation_service.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_gemini/config/secrets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart' as path;
+
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatProvider extends ChangeNotifier {
+  ChatProvider() {
+    initKnowledgeBase();
+  }
   //list of messages
   final List<Message> _inChatMessages = [];
+
+  // suggested replies
+  List<String> _suggestedReplies = [];
 
   //page controller
   final PageController _pageController = PageController();
@@ -44,6 +53,9 @@ class ChatProvider extends ChangeNotifier {
 
   //loading bool
   bool _isLoading = false;
+
+  // System instruction for the model
+  String _systemInstruction = '';
 
   //navigation service
   final MapNavigationService _navigationService = MapNavigationService();
@@ -102,15 +114,17 @@ class ChatProvider extends ChangeNotifier {
       _model =
           _textModel ??
           GenerativeModel(
-            model: setCurrentModel(newModel: 'gemini-2.5-flash'),
-            apiKey: ApiService.apikey,
+            model: 'gemini-2.5-flash',
+            apiKey: Secrets.geminiApiKey,
+            systemInstruction: Content.system(_systemInstruction),
           );
     } else {
       _model =
           _visionModel ??
           GenerativeModel(
-            model: setCurrentModel(newModel: 'gemini-2.5-flash'),
-            apiKey: ApiService.apikey,
+            model: 'gemini-2.5-flash',
+            apiKey: Secrets.geminiApiKey,
+            systemInstruction: Content.system(_systemInstruction),
           );
     }
     notifyListeners();
@@ -131,6 +145,23 @@ class ChatProvider extends ChangeNotifier {
   //set loading
   void setLoading({required bool value}) {
     _isLoading = value;
+    notifyListeners();
+  }
+
+  // Start a new chat
+  void startNewChat() {
+    _inChatMessages.clear();
+    _currentChatId = const Uuid().v4();
+    _imagesFileList = [];
+    notifyListeners();
+  }
+
+  // Load an existing chat
+  Future<void> loadChat(String chatId) async {
+    _inChatMessages.clear();
+    _currentChatId = chatId;
+    _imagesFileList = [];
+    await setInChatMessages(chatId: chatId);
     notifyListeners();
   }
 
@@ -194,7 +225,9 @@ class ChatProvider extends ChangeNotifier {
         setLoading(value: false);
 
         //open the map
-        await _navigationService.handleNavigationCommand(context, message);
+        if (context.mounted) {
+          await _navigationService.handleNavigationCommand(context, message);
+        }
 
         return;
       }
@@ -229,8 +262,9 @@ class ChatProvider extends ChangeNotifier {
       timeSent: DateTime.now(),
     );
 
-    // add this messahe to the list on inChatMessages
+    // add this message to the list on inChatMessages
     _inChatMessages.add(userMessage);
+    _suggestedReplies = []; // Clear suggestions
     notifyListeners();
 
     if (currentChatId.isEmpty) {
@@ -293,11 +327,42 @@ class ChatProvider extends ChangeNotifier {
                 .write(event.text);
             notifyListeners();
           },
-          onDone: () {
+          onDone: () async {
             // save message to hive db
+            await Hive.openBox('${Constant.chatMessagesBox}$chatId');
+            final messageBox = Hive.box('${Constant.chatMessagesBox}$chatId');
+
+            // Save user message
+            await messageBox.add(userMessage.toMap());
+
+            // Save assistant message
+            await messageBox.add(assistantMessage.toMap());
+
+            // Save to Chat History if it's a new conversation
+            final historyBox = Hive.box<ChatHistory>(Constant.chatHistoryBox);
+            final existingHistoryIndex = historyBox.values.toList().indexWhere(
+              (element) => element.chatid == chatId,
+            );
+
+            if (existingHistoryIndex == -1) {
+              final newHistory = ChatHistory(
+                chatid: chatId,
+                prompt: userMessage.message.toString(),
+                resonse: assistantMessage.message.toString(),
+                imagesUrls: userMessage.imageUrls,
+                timestamp: DateTime.now(),
+              );
+              await historyBox.add(newHistory);
+            } else {
+              // Optional: Update timestamp or last message for existing chat
+              // For now, we keep the original prompt as the "title"
+            }
 
             // set loading to false
             setLoading(value: false);
+
+            // Generate suggestions based on the conversation
+            generateSuggestions(chatId: chatId, isTextOnly: isTextOnly);
           },
         )
         .onError((error, stackTrace) {
@@ -324,10 +389,10 @@ class ChatProvider extends ChangeNotifier {
 
       final prompt = TextPart(message);
       final imageParts = imageBytes
-          .map((bytes) => DataPart('image/jpg', Uint8List.fromList(bytes)))
+          .map((bytes) => DataPart('image/jpeg', Uint8List.fromList(bytes)))
           .toList();
 
-      return Content.model([prompt, ...imageParts]);
+      return Content.multi([prompt, ...imageParts]);
     }
   }
 
@@ -369,6 +434,7 @@ class ChatProvider extends ChangeNotifier {
 
   // getters
   List<Message> get inChatMessages => _inChatMessages;
+  List<String> get suggestedReplies => _suggestedReplies;
   PageController get pageController => _pageController;
   List<XFile>? get imagesFileList => _imagesFileList;
   int get currentIndex => _currentIndex;
@@ -379,10 +445,8 @@ class ChatProvider extends ChangeNotifier {
   String get modelType => _modelType;
   bool get isLoading => _isLoading;
 
-  // init Hive box
-  static intHive() async {
-    final dir = await path.getApplicationDocumentsDirectory();
-    Hive.init(dir.path);
+  // init Hive box and Knowledge Base
+  static Future<void> init() async {
     await Hive.initFlutter(Constant.geminiDB);
 
     //register adapters
@@ -401,6 +465,90 @@ class ChatProvider extends ChangeNotifier {
     if (!Hive.isAdapterRegistered(2)) {
       Hive.registerAdapter(SettingsAdapter());
       await Hive.openBox<Settings>(Constant.settingsBox);
+    }
+
+    if (!Hive.isAdapterRegistered(3)) {
+      Hive.registerAdapter(AcademicRecordAdapter());
+      await Hive.openBox<AcademicRecord>('academic_records');
+    }
+
+    if (!Hive.isAdapterRegistered(4)) {
+      Hive.registerAdapter(DeadlineItemAdapter());
+      await Hive.openBox<DeadlineItem>('deadlines');
+    }
+  }
+
+  // Initialize the knowledge base
+  Future<void> initKnowledgeBase() async {
+    await updateUserContext();
+  }
+
+  // Update user context in system instruction
+  Future<void> updateUserContext() async {
+    final service = KnowledgeBaseService();
+    String instruction = await service.loadKnowledgeBase();
+
+    if (Hive.isBoxOpen(Constant.userBox)) {
+      final box = Hive.box<UserModel>(Constant.userBox);
+      if (box.isNotEmpty) {
+        final user = box.getAt(0);
+        instruction +=
+            "\n\n### USER CONTEXT\nUser Name: ${user?.name}\nUser Major: ${user?.major}";
+      }
+    }
+
+    if (Hive.isBoxOpen(Constant.settingsBox)) {
+      final box = Hive.box<Settings>(Constant.settingsBox);
+      if (box.isNotEmpty) {
+        final settings = box.getAt(0);
+        final language = settings?.language ?? 'en';
+        if (language == 'ms') {
+          instruction +=
+              "\n\n### LANGUAGE INSTRUCTION\nThe user prefers Bahasa Melayu. Please reply in Bahasa Melayu.";
+        } else {
+          instruction +=
+              "\n\n### LANGUAGE INSTRUCTION\nThe user prefers English. Please reply in English.";
+        }
+      }
+    }
+
+    _systemInstruction = instruction;
+    notifyListeners();
+  }
+
+  // Generate suggested replies
+  Future<void> generateSuggestions({
+    required String chatId,
+    required bool isTextOnly,
+  }) async {
+    try {
+      // Get the last few messages for context
+      final history = await getChatHistory(chatId: chatId);
+      if (history.isEmpty) return;
+
+      // Create a separate model instance for suggestions to avoid interfering with the main chat state
+      final suggestionModel = GenerativeModel(
+        model: 'gemini-2.5-flash',
+        apiKey: Secrets.geminiApiKey,
+        systemInstruction: Content.system(
+          'You are a helpful assistant. Generate 3-4 short, relevant follow-up questions or actions (max 3-4 words each) based on the conversation context. Output ONLY the suggestions separated by commas, no other text. Example: "Bus Schedule, Library Hours, Campus Map"',
+        ),
+      );
+
+      final response = await suggestionModel.generateContent(history);
+      final responseText = response.text;
+
+      if (responseText != null && responseText.isNotEmpty) {
+        _suggestedReplies = responseText
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .take(4)
+            .toList();
+        notifyListeners();
+      }
+    } catch (e) {
+      log('Error generating suggestions: $e');
     }
   }
 }

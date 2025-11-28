@@ -19,17 +19,20 @@ class SettingsAdapter extends TypeAdapter<Settings> {
     return Settings(
       isDarkTheme: fields[0] as bool,
       shouldSpeak: fields[1] as bool,
+      language: fields[2] == null ? 'en' : fields[2] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Settings obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.isDarkTheme)
       ..writeByte(1)
-      ..write(obj.shouldSpeak);
+      ..write(obj.shouldSpeak)
+      ..writeByte(2)
+      ..write(obj.language);
   }
 
   @override

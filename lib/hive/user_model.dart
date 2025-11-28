@@ -16,11 +16,15 @@ class UserModel extends HiveObject {
   @HiveField(3)
   final String email;
 
+  @HiveField(4)
+  final String major;
+
   //constructor
   UserModel({
     required this.uid,
     required this.name,
     required this.image,
     required this.email,
+    required this.major,
   });
 }

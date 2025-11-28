@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/providers/chat_provider.dart';
-import 'package:flutter_gemini/providers/gpa_provider.dart';
 import 'package:flutter_gemini/providers/theme_provider.dart';
-import 'package:flutter_gemini/screens/dashboard_screen.dart';
+import 'package:flutter_gemini/providers/academic_provider.dart';
+import 'package:flutter_gemini/providers/deadline_provider.dart';
+import 'package:flutter_gemini/providers/language_provider.dart';
+import 'package:flutter_gemini/screens/login_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await ChatProvider.intHive();
+  await ChatProvider.init();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => GpaProvider()),
+        ChangeNotifierProvider(create: (_) => AcademicProvider()),
+        ChangeNotifierProvider(create: (_) => DeadlineProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
       child: const MyApp(),
     ),
@@ -37,7 +40,7 @@ class MyApp extends StatelessWidget {
               ? ThemeMode.dark
               : ThemeMode.light,
           debugShowCheckedModeBanner: false,
-          home: const DashboardScreen(),
+          home: const LoginScreen(),
         );
       },
     );

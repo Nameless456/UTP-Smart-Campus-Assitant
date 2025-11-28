@@ -49,13 +49,14 @@ class ThemeProvider extends ChangeNotifier {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF6750A4), // Purple
+        seedColor: const Color(0xFF002B5C), // UTP Deep Blue
+        secondary: const Color(0xFFBEA42E), // UTP Gold
         brightness: Brightness.light,
       ),
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Color(0xFF6750A4),
+        backgroundColor: Color(0xFF002B5C), // UTP Deep Blue
         foregroundColor: Colors.white,
       ),
       cardTheme: CardThemeData(
@@ -64,6 +65,8 @@ class ThemeProvider extends ChangeNotifier {
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         elevation: 4,
+        backgroundColor: Color(0xFFBEA42E), // UTP Gold
+        foregroundColor: Colors.white,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -86,7 +89,8 @@ class ThemeProvider extends ChangeNotifier {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFFBB86FC), // Light purple
+        seedColor: const Color(0xFFBEA42E), // UTP Gold
+        secondary: const Color(0xFF002B5C), // UTP Deep Blue
         brightness: Brightness.dark,
       ),
       scaffoldBackgroundColor: const Color(0xFF121212),
@@ -94,7 +98,7 @@ class ThemeProvider extends ChangeNotifier {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Color(0xFF1F1F1F),
-        foregroundColor: Colors.white,
+        foregroundColor: Color(0xFFBEA42E), // UTP Gold
       ),
       cardTheme: CardThemeData(
         elevation: 2,
@@ -103,7 +107,8 @@ class ThemeProvider extends ChangeNotifier {
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         elevation: 4,
-        backgroundColor: Color(0xFFBB86FC),
+        backgroundColor: Color(0xFFBEA42E), // UTP Gold
+        foregroundColor: Colors.black,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

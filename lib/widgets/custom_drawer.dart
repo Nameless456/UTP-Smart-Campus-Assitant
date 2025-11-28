@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/screens/chat_history_screen.dart';
 import 'package:flutter_gemini/screens/chat_screen.dart';
-import 'package:flutter_gemini/screens/dashboard_screen.dart';
-import 'package:flutter_gemini/screens/gpa_calculator_screen.dart';
 import 'package:flutter_gemini/screens/profile_screen.dart';
+import 'package:flutter_gemini/screens/cgpa_calculator_screen.dart';
+import 'package:flutter_gemini/screens/deadline_tracker_screen.dart';
+import 'package:flutter_gemini/constant.dart';
+import 'package:flutter_gemini/hive/user_model.dart';
+import 'package:flutter_gemini/screens/login_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -33,20 +37,6 @@ class CustomDrawer extends StatelessWidget {
                 children: [
                   _buildDrawerItem(
                     context,
-                    icon: Icons.dashboard_outlined,
-                    title: 'Dashboard',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const DashboardScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
                     icon: Icons.chat_bubble_outline,
                     title: 'Chat',
                     onTap: () {
@@ -55,20 +45,6 @@ class CustomDrawer extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const ChatScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    icon: Icons.calculate_outlined,
-                    title: 'GPA Calculator',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const GpaCalculatorScreen(),
                         ),
                       );
                     },
@@ -101,6 +77,34 @@ class CustomDrawer extends StatelessWidget {
                       );
                     },
                   ),
+                  _buildDrawerItem(
+                    context,
+                    icon: Icons.calculate_outlined,
+                    title: 'GPA Calculator',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CgpaCalculatorScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    icon: Icons.event_note_outlined,
+                    title: 'Deadline Tracker',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DeadlineTrackerScreen(),
+                        ),
+                      );
+                    },
+                  ),
                   const Divider(height: 32),
                   _buildDrawerItem(
                     context,
@@ -109,6 +113,27 @@ class CustomDrawer extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       _showAboutDialog(context);
+                    },
+                  ),
+                  const Divider(height: 32),
+                  _buildDrawerItem(
+                    context,
+                    icon: Icons.logout,
+                    title: 'Logout',
+                    onTap: () async {
+                      Navigator.pop(context);
+                      // Clear user session
+                      final box = Hive.box<UserModel>(Constant.userBox);
+                      await box.clear();
+
+                      if (context.mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                          (route) => false,
+                        );
+                      }
                     },
                   ),
                 ],

@@ -3,6 +3,8 @@ import 'package:flutter_gemini/constant.dart';
 import 'package:flutter_gemini/hive/settings.dart';
 import 'package:flutter_gemini/hive/user_model.dart';
 import 'package:flutter_gemini/providers/theme_provider.dart';
+import 'package:flutter_gemini/providers/chat_provider.dart';
+import 'package:flutter_gemini/providers/language_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -18,11 +20,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
-        title: const Text('Profile & Settings'),
+        title: Text(languageProvider.getText('profile')),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -47,6 +50,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.all(32),
                   child: Column(
                     children: [
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          onPressed: () {
+                            _showEditProfileDialog(context);
+                          },
+                        ),
+                      ),
                       Container(
                         width: 100,
                         height: 100,
@@ -80,6 +92,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
+                                user?.major ?? 'General Studies',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
                                 user?.email ?? 'student@utp.edu.my',
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.9),
@@ -103,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Appearance',
+                    languageProvider.getText('appearance'),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -129,7 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: theme.colorScheme.primary,
                             ),
                           ),
-                          title: const Text('Dark Mode'),
+                          title: Text(languageProvider.getText('dark_mode')),
                           subtitle: Text(
                             themeProvider.isDarkMode ? 'Enabled' : 'Disabled',
                           ),
@@ -146,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   const SizedBox(height: 24),
                   Text(
-                    'Preferences',
+                    languageProvider.getText('preferences'),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -154,47 +175,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 12),
                   Card(
-                    child: ValueListenableBuilder<Box<Settings>>(
-                      valueListenable: Hive.box<Settings>(
-                        Constant.settingsBox,
-                      ).listenable(),
-                      builder: (context, box, _) {
-                        final settings = box.isEmpty ? null : box.getAt(0);
-                        final shouldSpeak = settings?.shouldSpeak ?? false;
-
-                        return ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.1,
+                    child: Column(
+                      children: [
+                        Consumer<LanguageProvider>(
+                          builder: (context, languageProvider, child) {
+                            return ListTile(
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.language,
+                                  color: theme.colorScheme.primary,
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.volume_up,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          title: const Text('Text-to-Speech'),
-                          subtitle: Text(shouldSpeak ? 'Enabled' : 'Disabled'),
-                          trailing: Switch(
-                            value: shouldSpeak,
-                            onChanged: (value) async {
-                              if (settings != null) {
-                                settings.shouldSpeak = value;
-                                await settings.save();
-                              }
-                            },
-                          ),
-                        );
-                      },
+                              title: Text(languageProvider.getText('language')),
+                              subtitle: Text(
+                                languageProvider.isMalay
+                                    ? 'Bahasa Melayu'
+                                    : 'English',
+                              ),
+                              trailing: Switch(
+                                value: languageProvider.isMalay,
+                                onChanged: (value) async {
+                                  await languageProvider.setLanguage(
+                                    value ? 'ms' : 'en',
+                                  );
+                                  // Update ChatProvider context to reflect language change
+                                  if (context.mounted) {
+                                    Provider.of<ChatProvider>(
+                                      context,
+                                      listen: false,
+                                    ).updateUserContext();
+                                  }
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
 
                   const SizedBox(height: 24),
                   Text(
-                    'About',
+                    languageProvider.getText('about'),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -247,6 +276,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _showEditProfileDialog(BuildContext context) async {
+    final languageProvider = Provider.of<LanguageProvider>(
+      context,
+      listen: false,
+    );
+    final box = Hive.box<UserModel>(Constant.userBox);
+    final user = box.isEmpty ? null : box.getAt(0);
+
+    final nameController = TextEditingController(text: user?.name ?? '');
+    final majorController = TextEditingController(text: user?.major ?? '');
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(languageProvider.getText('edit_profile')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: languageProvider.getText('name'),
+                hintText: 'Enter your name',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: majorController,
+              decoration: InputDecoration(
+                labelText: languageProvider.getText('major'),
+                hintText: 'e.g. Computer Science',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(languageProvider.getText('cancel')),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final newName = nameController.text.trim();
+              final newMajor = majorController.text.trim();
+
+              if (newName.isNotEmpty) {
+                final newUser = UserModel(
+                  uid: user?.uid ?? 'user_1',
+                  name: newName,
+                  image: user?.image ?? '',
+                  email: user?.email ?? 'student@utp.edu.my',
+                  major: newMajor,
+                );
+
+                if (box.isEmpty) {
+                  await box.add(newUser);
+                } else {
+                  await box.putAt(0, newUser);
+                }
+
+                if (context.mounted) {
+                  // Update ChatProvider context
+                  Provider.of<ChatProvider>(
+                    context,
+                    listen: false,
+                  ).updateUserContext();
+                  Navigator.pop(context);
+                }
+              }
+            },
+            child: Text(languageProvider.getText('save')),
+          ),
+        ],
       ),
     );
   }
